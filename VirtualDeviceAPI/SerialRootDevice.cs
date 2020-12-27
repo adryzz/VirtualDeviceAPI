@@ -26,6 +26,8 @@ namespace VirtualDeviceAPI
 
         SerialPort port;
 
+        public event EventHandler<VirtualDeviceEventArgs> DeviceAttached;
+
         public void Initialize(params object[] parameters)
         {
             devices = new List<IVirtualDevice>();
@@ -71,23 +73,25 @@ namespace VirtualDeviceAPI
                         }
                     case 0x01:
                         {
+                            IVirtualDevice device = GetDevice(packet);
                             bool found = false;
                             for(int i = 0; i < Subdevices.Count; i++)
                             {
                                 if (Subdevices[i].Id == packet[2]) //if the device already exists, update it
                                 {
-                                    Subdevices[i] = GetDevice(packet);
+                                    Subdevices[i] = device;
                                     found = true;
                                 }
                             }
                             //if the device doesn't already exist, add it
                             if (!found)
                             {
-                                devices.Add(GetDevice(packet));
+                                devices.Add(device);
                             }
 
                             //sort the list on the device ID
                             devices = devices.OrderBy(o => o.Id).ToList();
+                            DeviceAttached?.Invoke(this, new VirtualDeviceEventArgs(device));
                             break;
                         }
                     case 0x02:

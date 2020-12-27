@@ -16,6 +16,8 @@ namespace VirtualDeviceAPI
 
         public bool IsConnected { get; }
 
+        public event EventHandler<VirtualDeviceEventArgs> DeviceAttached;
+
         public void Initialize(params object[] parameters);
 
         public void Connect();
@@ -25,5 +27,15 @@ namespace VirtualDeviceAPI
         public void RefreshDevices();
 
         public void SendPacket(byte[] packet);
+    }
+
+    public class VirtualDeviceEventArgs : EventArgs
+    {
+        public IVirtualDevice Device;
+
+        public VirtualDeviceEventArgs(IVirtualDevice device)
+        {
+            Device = device;
+        }
     }
 }
